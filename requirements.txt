@@ -1,0 +1,15 @@
+# Minimums are the versions the pipeline was verified on (Windows 11, 2026-10-13).
+# Also needed, outside pip: ffmpeg + ffprobe on PATH, Node.js, and
+#   python -m playwright install chromium
+Pillow>=12.1
+numpy>=2.4
+imageio-ffmpeg>=0.6
+faster-whisper>=1.2.1
+torch>=2.13
+torchvision>=0.28
+playwright>=1.42
+yt-dlp>=2026.7.4
+yt-dlp-ejs>=0.8
+gallery-dl>=1.31
+kokoro-onnx>=0.6.1
+soundfile>=0.13

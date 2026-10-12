@@ -1,0 +1,13 @@
+# CTA keywords already spent. Never reuse one. The DM automation routes on the
+# word, so a repeat sends the wrong deliverable to everyone who comments.
+#
+# Copy this file to keywords_burned.txt (git-ignored) and keep it append only.
+# newreel.py appends to it; scripts/lint.sh --cta and lib/util.py claim_keyword
+# read field 1 of each line. Lines starting with # are ignored.
+#
+# Seed it with every keyword your account has EVER used before the first reel.
+# A ledger that does not know what shipped is worse than none: lint once
+# returned "clean" for a keyword that 3,546 comments were already routing on.
+#
+# Format, one per line:
+#   WORD      # where it was used, date, views/comments

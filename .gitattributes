@@ -1,0 +1,12 @@
+# Normalise line endings. A CRLF shell script fails under bash with
+# "$'\r': command not found", so the linter is pinned to LF everywhere.
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.js text eol=lf linguist-vendored
+reel-system/assets/three/** linguist-vendored
+*.png binary
+*.jpg binary
+*.glb binary

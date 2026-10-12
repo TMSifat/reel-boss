@@ -1,0 +1,25 @@
+# Your live CTA keyword ledger. Personal, and pulls must never overwrite it.
+# Start one from reel-system/keywords_burned.template.txt.
+reel-system/keywords_burned.txt
+
+# Apple Color Emoji renders. Apple's font licence forbids redistributing them;
+# bake your own on a Mac, see reel-system/assets/emoji/README.md.
+reel-system/assets/emoji/*.png
+
+# Builds, pulls and scratch
+reel-system/projects/
+reel-system/refs/
+_trim_parts/
+_work/
+_pw/
+_sb/
+*_16k.wav
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db

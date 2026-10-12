@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyflakes
+      - name: pyflakes
+        run: python -m pyflakes reel-system scripts
+      - name: easing self-check
+        run: python reel-system/lib/ease.py
+      - name: topic gate
+        run: |
+          python scripts/topic_gate.py --angry --object --caption "test"
+          ! python scripts/topic_gate.py --stake
+      - name: publish linter
+        env:
+          REEL_BURNED_KEYWORDS: reel-system/keywords_burned.template.txt
+        run: |
+          bash scripts/lint.sh "DocuSign is \$50 a month. MIT licensed."
+          bash scripts/lint.sh --allow-free "free on GitHub"
+          ! bash scripts/lint.sh "it is free."
+          ! bash scripts/lint.sh "a — b"
+          ! bash scripts/lint.sh "a -- b"
+          bash scripts/lint.sh --cta ZEBRA
+          ! bash scripts/lint.sh --cta zebra
