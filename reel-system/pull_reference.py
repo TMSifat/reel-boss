@@ -28,6 +28,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -37,6 +38,10 @@ from pathlib import Path
 BROWSER = os.environ.get("REEL_COOKIE_BROWSER", "chrome")
 # Run as modules: pip often puts the .exe shims in a Scripts dir that is not on PATH.
 YTDLP = [sys.executable, "-m", "yt_dlp"]
+# yt-dlp enables only Deno by default now; YouTube needs a JS runtime, and Node
+# is the one doctor.py checks for. Without this the preflight passes and the pull fails.
+if shutil.which("node"):
+    YTDLP += ["--js-runtimes", "node"]
 GALLERYDL = [sys.executable, "-m", "gallery_dl"]
 HERE = Path(__file__).resolve().parent
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # titles carry emoji; cp1252 dies

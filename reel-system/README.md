@@ -17,7 +17,7 @@ library.
 | faster-whisper | 1.2.1, `small.en` | transcribed the smoke take, 47 words |
 | torch / torchvision | 2.13.0 / 0.28.0 | DeepLabV3 MobileNetV3 forward pass |
 | Playwright | 1.62.0, chromium 151.0.7922.34 | recorded `proof.html` |
-| yt-dlp | 2026.07.04 | pulled live view/like/comment counts with `--js-runtimes node` |
+| yt-dlp | 2026.8.19 | pulled live view/like/comment counts with `--js-runtimes node` |
 | yt-dlp-ejs | 0.8.0 | the YouTube 403 fix |
 | Pillow | 12.1.1 | every graphic and every caption frame |
 | numpy | 2.4.3 | matte and frame buffers |
@@ -37,8 +37,10 @@ reel-system/
   newreel.py           stage 0, opens a reel and claims the keyword
   voice.py             stage 0b, no phone take: local AI voice -> take.mp4, faceless
   stt.py               stage 1, word level transcript, captions in the script's spelling
-  trim.py              stage 2, cut pauses, speed up, retime the words
-  matte.py             stage 3, cut the presenter out of the background
+  trim.py              stage 2, cut pauses, speed up, retime the words, start on the voice
+  breathe.py           stage 2a, optional: cap pauses instead of deleting them
+  pace.py              stage 2b, optional: per line speeds, locked to the shot anchors
+  matte.py             stage 3, optional: person matte (final.py uses a window instead)
   theme.py             stage 4, banner, progress, plates, captions, emoji
   renderers/
     screenrec.py       b-roll A, real screens via Playwright, with the mask
@@ -48,6 +50,7 @@ reel-system/
     scene3d.py         b-roll E, 3D via three.js: price bars, or a .glb turntable
   final.py             stage 5, composite, master, deliver
   verify.py            stage 6, check the DELIVERED file, not the log
+  addmusic.py          stage 7, optional: ducked music bed, then re-master to -14 LUFS
   lib/util.py          loudness, silence, seeded shuffle, text lint, keyword ledger
   lib/ease.py          easing curves every renderer and the compositor share
   assets/three/        vendored three.js 0.170.0 (MIT) and the 3D scene page
@@ -156,6 +159,19 @@ of 16s and looped).
 **Captions spell what the script spells.** `stt.py` aligns Whisper's words to
 reel.json's script and keeps the script's spelling wherever a heard word is a
 close match: "DakuSign" becomes DocuSign, "kazook" becomes the keyword.
+
+**Frame 0 has sound.** Silence at 0.1s is the account's loudest dead-post
+signal (hits about -17 dBFS, the 89 view reel -64.6). `trim.py` starts the reel
+at the measured voice onset, and `verify.py` fails anything under -30 dBFS.
+
+**Shots never loop.** A b-roll clip shorter than its shot holds its last frame
+and `final.py` prints the `--seconds` to re-render it at; looping once reset a
+$6,000 counter to $0 on screen. Shot anchors are searched after the previous
+cut and must be unambiguous, and `voice.py` picks openings said only once.
+
+**verify.py reads reel.json.** With `--project` it takes `forbid` and
+`max_seconds` from the spec, so the repo-name gate cannot be skipped by
+forgetting to retype it.
 
 **The keyword is burned last.** `newreel.py` refuses an existing slug before it
 touches the ledger, so a typo'd rerun cannot waste a keyword.

@@ -25,7 +25,7 @@ reach.** Evidence: [what-actually-moves-reach.md](references/what-actually-moves
 
 | | |
 |---|---|
-| Length | 15 to 20 seconds by habit. **Not a law.** The two hits are 54.17s and 13.44s. Never cut a real-world beat to hit 20. The pipeline caps at 20 by default; raise it per reel with `spec.max_seconds` in reel.json and `verify.py --max-seconds`. |
+| Length | 15 to 20 seconds by habit. **Not a law.** The two hits are 54.17s and 13.44s, and non-followers are still recommended reels up to 3 minutes. Never cut a real-world beat to hit 20. The pipeline caps at 20 by default; raise it per reel with `spec.max_seconds` in reel.json and `verify.py --max-seconds`. |
 | Frame | 1080 x 1920, 30fps, vertical, full bleed |
 | Audio | 48 kHz stereo, -14 LUFS integrated, true peak under -1 dBTP |
 | Voice | one person, phone camera, chest up, straight to camera. No take? The local AI voice (`voice.py`) reads the script over full-frame b-roll. **Never deliver a reel without a voice**: no guide tracks, no music-only animatics |
@@ -38,8 +38,10 @@ reach.** Evidence: [what-actually-moves-reach.md](references/what-actually-moves
    recognises, out loud, in the first five seconds.
 2. **Proof on a real screen.** Actual footage of the thing working. Not a
    mockup, not a slide. This is the like-vs-comment line.
-3. **The presenter, cut out.** No box, no border. Segmented and composited over
-   the footage so a face and the evidence share the frame.
+3. **The presenter and the evidence share the frame.** `final.py` shows the
+   take as a floating window (rounded, rimmed, shadowed) that pops between
+   corners over the proof; the full-frame hook comes first. No take: the reel
+   goes faceless and the b-roll carries every frame.
 4. **One word.** "Comment VET and I will send you the setup."
 
 A reel that is not landing is almost always missing beat 1 or beat 2.
@@ -90,7 +92,10 @@ Run these in order. Skipping a stage is how the known failures happen.
 python scripts/topic_gate.py
 ```
 
-Under the pass mark (55), **do not shoot it**. The gate is really asking: **is
+55 or more: **shoot it**. 40 to 54: **test it first** as a Trial Reel, which
+shows it to non-followers only (accounts with 1,000+ followers have them); the
+NASA reel, the account's third best at 6,683 views, scores 42. Under 40: **do
+not shoot it**. The gate is really asking: **is
 there a named party who would be angry this exists, and is there a physical
 object a camera can point at?** Those two carry 55 of the 100 points because
 they are what separated 89,480 from 89.
@@ -123,6 +128,8 @@ source.
 **3. Script. Six lines, read briskly, no pauses.**
 - Line 1 comes off [hook-sheet.md](references/hook-sheet.md), never invented
   fresh. Offer three options, each a different pattern, and name the pattern.
+  Start from 21 to 23: they are the account's own winners, the 20 generic
+  patterns above them never produced a hit here.
 - Lines 2 and 3 carry the numbers, and the numbers must become the viewer's
   problem: state the scale, then make it personal. "Somebody checked forty two
   thousand of them. One in four had a hole in it. **You install these with one
@@ -151,12 +158,16 @@ download), writes `take.mp4`, makes the reel faceless and anchors one shot per
 block of lines. Then carry on at `stt.py` exactly as with a phone take.
 Captions take the script's spelling, so "DocuSign" never shows up as
 "DakuSign". Tell the user it is a synthetic voice, offer to swap in their
-own take, and switch on Instagram's AI label when posting.
+own take, and switch on Instagram's AI label when posting (it marks the
+content; it does not change the account's standing).
 
 **5. Edit.** Two options.
 *No code:* CapCut, cut every gap, bold high contrast overlays out of the danger
 zones, auto captions, export 1080p. Genuinely fine.
-*The real one:* the local Python pipeline in `reel-system/`. Run
+*The real one:* the local Python pipeline in `reel-system/`. Optional stages:
+`breathe.py` + `pace.py` give the read a rhythm (capped pauses, per line
+speeds) instead of trim's cut-every-pause; `addmusic.py` lays a ducked bed
+under the voice, from a track you hold the rights to, and re-masters. Run
 `python scripts/doctor.py` first: it fails before a keyword is burned, not
 after. Stages and commands: [pipeline.md](references/pipeline.md).
 B-roll kit, real screen first: `screenrec.py` (a real page), `graphic.py`,
@@ -173,7 +184,8 @@ Three things worth stealing even in a different build:
 
 **6. Deliver and check.** Two files per reel: `NAME.mp4` and a 16 frame contact
 sheet `NAME_SB.jpg`. **Check the delivered file, not the build log** (`verify.py`
-does, and it fails any reel under one spoken word a second). Pull frames out of the shipped mp4, look at them, transcribe the
+does: it fails a reel under one spoken word a second, one silent at 0.1s, a
+video/audio length mismatch, and a spoken gate word from reel.json's `forbid`). Pull frames out of the shipped mp4, look at them, transcribe the
 delivered audio. The contact sheet answers one question: **does anything
 overlap anything else?** Banner over caption, caption over presenter, presenter
 over the one graphic that matters.
@@ -196,7 +208,10 @@ It fails on em dash, en dash, horizontal bar, minus sign, double hyphen, the
 word "free" (WARN with `--allow-free`), and a burned CTA keyword.
 
 Wire the keyword into the DM automation **before** the post goes up; the word
-was said on camera and cannot change. Posting through an API to more than one
+was said on camera and cannot change. Meta allows one automated DM per
+comment, within 7 days, and it does not open the 24 hour messaging window, so
+**that one DM must carry the deliverable itself**, never a "follow me first"
+step. Posting through an API to more than one
 account: always target by account ID, never the default.
 
 ## If you only take three things
@@ -214,7 +229,8 @@ account: always target by account ID, never the default.
   traps that cost posts, toolchain, Windows setup, env vars, corrections history
 - [references/what-actually-moves-reach.md](references/what-actually-moves-reach.md)
   - measured evidence for every claim above. Re-measure before trusting it
-- [references/hook-sheet.md](references/hook-sheet.md) - the 20 hook patterns
+- [references/hook-sheet.md](references/hook-sheet.md) - 23 hook patterns, 3 of
+  them the account's own winners
 - [references/pipeline.md](references/pipeline.md) - build stages, commands,
   and what each guard protects
 - [references/how-we-make-a-reel.md](references/how-we-make-a-reel.md) - the

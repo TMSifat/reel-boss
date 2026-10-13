@@ -34,6 +34,16 @@ which pattern each one is so they can see the framework.
 | 19 | Harder than promised | "No one told me ___ was going to be this difficult." |
 | 20 | Tested three | "I tried 3 strategies for ___. This is what really worked." |
 
+### Taken from this account's winners. Start here.
+
+None of the two hits fits a pattern above, so these come off them directly.
+
+| # | Pattern | Template | Source |
+|---|---|---|---|
+| 21 | Angry party | "___ is going to be pissed someone open sourced ___." | "Flock is going to be pissed..." **89,480** |
+| 22 | Shouldn't exist | "This ___ probably shouldn't exist." / "Leaked: ___, open sourced." | military grade radar **68,591** |
+| 23 | Institution gave it away | "___ just gave away the plans to ___." | "NASA gave away the plans to a Mars rover" **6,683** |
+
 ## For this account specifically
 
 The hook still has to carry **a named paid thing losing**, inside the first five

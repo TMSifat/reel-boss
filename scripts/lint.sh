@@ -72,9 +72,11 @@ lint_cta() {
   # reported "11 keywords burned" for a file holding 7. A guard that misreports
   # its own coverage invites trust it has not earned.
   local n
-  n=$(awk 'NF && $1 !~ /^#/ {c++} END {print c+0}' "$BURNED")
+  # sub(/\r$/,"") because a hand-added Windows line "WORD\r" was invisible here
+  # while Python's claim_keyword caught it: two guards disagreeing on one ledger.
+  n=$(awk '{sub(/\r$/,"")} NF && $1 !~ /^#/ {c++} END {print c+0}' "$BURNED")
 
-  if awk '$1 !~ /^#/ {print $1}' "$BURNED" | grep -qx "$upper"; then
+  if awk '{sub(/\r$/,"")} $1 !~ /^#/ {print toupper($1)}' "$BURNED" | grep -qx "$upper"; then
     die "$upper is already burned in $BURNED. The automation routes on it. Pick another."
   else
     ok "$upper is not in the burned list ($n keywords burned so far)"

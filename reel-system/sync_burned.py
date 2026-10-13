@@ -20,6 +20,7 @@ this CANNOT see the full history. It widens the guard, it does not complete it.
 """
 import argparse
 import json
+import os
 import re
 import sys
 import urllib.request
@@ -27,8 +28,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-LEDGER = HERE / "keywords_burned.txt"
-USER = "billy.coder"
+sys.path.insert(0, str(HERE))
+import config as C  # noqa: E402
+
+LEDGER = C.BURNED_KEYWORDS          # one ledger, the same one lint.sh reads
+USER = os.environ.get("REEL_ACCOUNT", "billy.coder")
 APP_ID = "936619743392459"
 
 BEGIN = "# A. LIVE ON INSTAGRAM"

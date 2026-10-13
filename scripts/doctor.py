@@ -28,7 +28,6 @@ print(f"python {sys.version.split()[0]} on {sys.platform}\n")
 print("python packages")
 for mod, pip, stage in [("PIL", "Pillow", "every graphic"), ("numpy", "numpy", "matte"),
                         ("faster_whisper", "faster-whisper", "stt.py"),
-                        ("torch", "torch", "matte.py"), ("torchvision", "torchvision", "matte.py"),
                         ("playwright", "playwright", "screenrec.py"),
                         ("yt_dlp", "yt-dlp", "pull_reference.py"),
                         ("yt_dlp_ejs", "yt-dlp-ejs", "YouTube 403 fix"),
@@ -68,6 +67,10 @@ check(have, f"voice model in {voice.MODELS}", "python reel-system/voice.py --dow
 check(C.BURNED_KEYWORDS.exists(), f"keyword ledger {C.BURNED_KEYWORDS}",
       "copy reel-system/keywords_burned.template.txt to keywords_burned.txt and "
       "seed it with every keyword the account has ever used")
+# Not counted: matte.py is optional (final.py shows the presenter as a window)
+for mod in ("torch", "torchvision"):
+    print(f"  {'ok  ' if importlib.util.find_spec(mod) else 'note'}  {mod:<15} "
+          f"optional, matte.py only (several GB)")
 # Not counted: only needed to bake a NEW emoji, which needs a Mac anyway.
 print(f"  {'ok  ' if Path(C.APPLE_EMOJI_TTC).exists() else 'note'}  "
       f"Apple Color Emoji (only to bake new glyphs): {C.APPLE_EMOJI_TTC}")

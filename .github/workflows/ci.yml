@@ -18,10 +18,13 @@ jobs:
         run: python -m pyflakes reel-system scripts
       - name: easing self-check
         run: python reel-system/lib/ease.py
+      - name: shot anchor self-check
+        run: python -c "import sys; sys.path.insert(0, 'reel-system'); import voice; voice._selfcheck()"
       - name: topic gate
         run: |
           python scripts/topic_gate.py --angry --object --caption "test"
           ! python scripts/topic_gate.py --stake
+          python scripts/topic_gate.py --object --institution --sendable || test $? -eq 2
       - name: publish linter
         env:
           REEL_BURNED_KEYWORDS: reel-system/keywords_burned.template.txt

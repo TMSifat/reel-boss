@@ -41,6 +41,9 @@ problem.** The CTA works, the keyword mechanic works, the comment ask works. The
 only variable that has ever moved is **how many people the first three seconds
 were served to**. Do not spend another build tuning the ask.
 
+> Measured 2026-08-22. Re-measure the last 12 posts before relying on these
+> numbers; they are a snapshot of one account, not a law.
+
 ## 2. What separated the two that got served
 
 Classified from each post's own caption and opening frames:

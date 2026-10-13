@@ -26,12 +26,14 @@ Usage:
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 
-MUSIC = os.path.expanduser(os.environ.get("REEL_MUSIC",
-    "~/Documents/Notes/j-raw-footage/Everything_In_Its_Right_Place(48k)_music-only.mp3"))
+# No default track. The old default was a commercial song: a rights claim, and
+# Instagram's repost filter flags shared audio. Use a track you have rights to.
+MUSIC = os.environ.get("REEL_MUSIC")
 DUCK = "sidechaincompress=threshold=0.06:ratio=4:attack=15:release=350:makeup=1"
 
 
@@ -87,13 +89,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
     ap.add_argument("-o", "--out", default=None)
-    ap.add_argument("-m", "--music", default=MUSIC)
+    ap.add_argument("-m", "--music", default=MUSIC,
+                    help="a track you have the rights to (or set REEL_MUSIC)")
     ap.add_argument("--gap", type=float, default=4.8,
                     help="dB the bed sits under the voice (default 4.8, approved)")
     a = ap.parse_args()
 
+    if not a.music:
+        sys.exit("no music: pass -m TRACK (one you have the rights to) or set REEL_MUSIC")
+    a.music = os.path.expanduser(a.music)
     for tool in ("ffmpeg", "ffprobe"):
-        if not subprocess.run(["which", tool], capture_output=True).returncode == 0:
+        if not shutil.which(tool):          # `which` does not exist on Windows
             sys.exit(f"missing tool: {tool}")
     for p in (a.video, a.music):
         if not os.path.exists(p):
@@ -137,6 +143,21 @@ def main():
              "-map", "0:v", "-map", "[aout]", "-c:v", "copy",
              "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
              "-movflags", "+faststart", out], check=True)
+
+        # The bed adds energy after final.py mastered the voice, so the posted
+        # file was never at -14 LUFS. Master the mixed audio again, video copied.
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.util import master
+        mixed, mastered = os.path.join(td, "mixed.wav"), os.path.join(td, "mastered.wav")
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", out,
+                        "-vn", "-c:a", "pcm_s16le", mixed], check=True)
+        master(mixed, mastered)
+        tmp_out = out + ".tmp.mp4"
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                        "-i", out, "-i", mastered, "-map", "0:v", "-map", "1:a",
+                        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                        "-movflags", "+faststart", tmp_out], check=True)
+        os.replace(tmp_out, out)
 
         # VERIFY: phase-invert the original against a lossless mix, so what
         # remains IS the bed. A mean alone would hide a silent opening.

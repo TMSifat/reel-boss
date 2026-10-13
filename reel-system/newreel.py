@@ -9,6 +9,7 @@ the ledger here, at the top of the job, and the ledger refuses a repeat.
 """
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -30,9 +31,8 @@ TEMPLATE = {
         {"from": 0.0, "to": 3.0, "mode": "full"},
         {"from": 3.0, "to": 60.0, "mode": "mini", "corner": "br"}
     ],
-    "plates": [
-        {"from": 0.0, "to": 3.0, "text": "", "sub": "", "y": 520, "emoji": None}
-    ],
+    # e.g. {"on_phrase": "one click", "text": "One click", "sub": "to sign", "y": 520}
+    "plates": [],
     "caption": {"hook": "", "what": "", "licence": "", "cta": "", "hashtags": []}
 }
 
@@ -43,7 +43,7 @@ def main():
     ap.add_argument("--palette", required=True, choices=sorted(C.PALETTES))
     ap.add_argument("--cta", required=True)
     ap.add_argument("--banner", required=True)
-    ap.add_argument("--handle", default="@billy.coder")
+    ap.add_argument("--handle", default=os.environ.get("REEL_HANDLE", "@billy.coder"))
     ap.add_argument("--forbid", nargs="*", default=[])
     a = ap.parse_args()
 

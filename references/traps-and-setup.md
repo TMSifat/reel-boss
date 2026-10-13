@@ -13,7 +13,10 @@ something breaks.
 4. **Overlays that hide the evidence.** A banner covering the install command is
    worse than no banner. Give furniture a fixed zone, lay content underneath.
 5. **Pulling b-roll from the competitor's reel.** Check the project's own site
-   or repo first. Higher quality, and not somebody else's frame.
+   or repo first. Higher quality, and not somebody else's frame. Since April
+   2026 Instagram reportedly flags reposts that share most of another
+   creator's visuals or audio, which is also why `addmusic.py` has no default
+   track: use one you hold the rights to.
 6. **Fake randomness.** `(i * 97 + 13) % N` drew visible diagonal stripes. Use a
    seeded shuffle: random-looking, identical between rebuilds.
 
@@ -33,6 +36,16 @@ command for anything missing.
 
 `yt-dlp` on YouTube needs a JS runtime. On a 403 across every format, install
 `yt-dlp-ejs` and pass `--js-runtimes node`.
+
+## Sandboxed and cloud sessions
+
+- `stt.py` downloads Whisper `small.en` from Hugging Face on first use, and
+  `voice.py` downloads Kokoro from GitHub. Where those hosts are blocked, fetch
+  the models once on a machine that can and copy the caches across
+  (`~/.cache/huggingface`, `~/.cache/reel-boss/kokoro`).
+- Linux fonts fall back from Microsoft core fonts to Liberation Sans (same
+  metrics as Arial) to DejaVu. `doctor.py` shows which one resolved.
+- Verified on ffmpeg 6.1 and 8.x.
 
 ## Windows
 

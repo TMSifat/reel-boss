@@ -54,7 +54,7 @@ def build(project):
 
     cuts = [0.0]
     for a in spec["shot_anchors"]:
-        s, _ = find_phrase(words, a)
+        s, _ = find_phrase(words, a, after=cuts[-1])
         cuts.append(round(s - 0.10, 3))
     cuts.append(round(total, 3))
     spans = [(cuts[i], cuts[i + 1]) for i in range(len(cuts) - 1)]

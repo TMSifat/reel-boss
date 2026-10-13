@@ -85,6 +85,22 @@ def script_lines(spec):
     return lines
 
 
+def unique_opening(lines, k):
+    """The shortest opening of line k (2+ words) said nowhere later in the script.
+
+    Two words were not enough: line 5's "It is" also opened "Here it is
+    running" inside line 4, and the shot cut 2.5s early.
+    """
+    norm = lambda s: [w.strip(" .,!?").lower() for w in s.split()]
+    rest = norm(" ".join(lines[k - 1:]))       # the line before can contain it too
+    line = norm(lines[k])
+    for n in range(2, len(line) + 1):
+        want = line[:n]
+        if sum(rest[i:i + n] == want for i in range(len(rest) - n + 1)) == 1:
+            return " ".join(lines[k].split()[:n])
+    return lines[k]
+
+
 def speak(project, voice=DEFAULT_VOICE, speed=1.05):
     import numpy as np
     import soundfile as sf
@@ -118,7 +134,7 @@ def speak(project, voice=DEFAULT_VOICE, speed=1.05):
     # evenly, so one shot ate 12s of a 16s reel. Anchor shots to line starts.
     n = len(spec.get("shots", []))
     if n > 1 and not spec.get("shot_anchors") and len(lines) >= n:
-        spec["shot_anchors"] = [" ".join(lines[round(i * len(lines) / n)].split()[:2])
+        spec["shot_anchors"] = [unique_opening(lines, round(i * len(lines) / n))
                                 for i in range(1, n)]
         print(f"[voice] shot_anchors {spec['shot_anchors']} (one shot per block of lines)")
     spec["presenter_track"] = []
@@ -132,7 +148,14 @@ def speak(project, voice=DEFAULT_VOICE, speed=1.05):
     return take
 
 
+def _selfcheck():
+    lines = ["Watch this.", "Here it is running on my laptop.", "It is MIT licensed."]
+    assert unique_opening(lines, 2) == "It is MIT", unique_opening(lines, 2)
+    assert unique_opening(["a b", "c d e", "f g"], 1) == "c d"
+
+
 if __name__ == "__main__":
+    _selfcheck()
     ap = argparse.ArgumentParser()
     ap.add_argument("project", nargs="?")
     ap.add_argument("--voice", default=DEFAULT_VOICE)

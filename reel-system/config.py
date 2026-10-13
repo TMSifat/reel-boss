@@ -90,9 +90,16 @@ elif sys.platform == "darwin":
     FONT_BOLD = "/System/Library/Fonts/Supplemental/Arial Black.ttf"
     FONT_REG = "/System/Library/Fonts/Supplemental/Arial.ttf"
     FONT_MONO = "/System/Library/Fonts/Menlo.ttc"
-else:  # Linux: apt install ttf-mscorefonts-installer, or point REEL_FONT_* elsewhere
-    _F = Path("/usr/share/fonts/truetype/msttcorefonts")
-    FONT_BOLD, FONT_REG, FONT_MONO = _F / "Arial_Black.ttf", _F / "Arial.ttf", _F / "Courier_New.ttf"
+else:  # Linux: Microsoft core fonts if installed, else Liberation (same metrics as Arial)
+    def _first(*paths):
+        return next((p for p in map(Path, paths) if p.exists()), Path(paths[0]))
+    _M, _L = Path("/usr/share/fonts/truetype/msttcorefonts"), Path("/usr/share/fonts/truetype/liberation")
+    FONT_BOLD = _first(_M / "Arial_Black.ttf", _L / "LiberationSans-Bold.ttf",
+                       "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    FONT_REG = _first(_M / "Arial.ttf", _L / "LiberationSans-Regular.ttf",
+                      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+    FONT_MONO = _first(_M / "Courier_New.ttf", _L / "LiberationMono-Regular.ttf",
+                       "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")
 FONT_BOLD = os.environ.get("REEL_FONT_BOLD", FONT_BOLD)
 FONT_REG = os.environ.get("REEL_FONT_REG", FONT_REG)
 FONT_MONO = os.environ.get("REEL_FONT_MONO", FONT_MONO)

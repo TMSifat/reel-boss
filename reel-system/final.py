@@ -65,7 +65,7 @@ def spans_from_anchors(words, anchors, total):
     """
     cuts = [0.0]
     for a in anchors:
-        s, _ = find_phrase(words, a)
+        s, _ = find_phrase(words, a, after=cuts[-1])
         cut = round(s - 0.10, 3)
         if cut <= cuts[-1]:
             raise ValueError(f"shot anchor {a!r} lands at {cut}s, "
@@ -75,17 +75,26 @@ def spans_from_anchors(words, anchors, total):
     return [(cuts[i], cuts[i + 1]) for i in range(len(cuts) - 1)]
 
 
-def find_phrase(words, phrase):
+def find_phrase(words, phrase, after=None):
     """Locate a phrase in the transcript and return its (start, end).
 
     Plates are anchored to the words that are actually being said, so a pacing
     change re-times them instead of sliding them off the line they belong to.
+    With `after` (shot anchors) only matches past that time count, and more
+    than one is an error: "It is" once matched "Here it is running" a line
+    early and cut a shot 2.5s short.
     """
     toks = [w["w"].strip(" .,!?").lower() for w in words]
     want = [t.strip(" .,!?").lower() for t in phrase.split()]
-    for i in range(len(toks) - len(want) + 1):
-        if toks[i:i + len(want)] == want:
-            return words[i]["start"], words[i + len(want) - 1]["end"]
+    hits = [i for i in range(len(toks) - len(want) + 1)
+            if toks[i:i + len(want)] == want
+            and (after is None or words[i]["start"] > after)]
+    if after is not None and len(hits) > 1:
+        raise ValueError(f"anchor {phrase!r} is ambiguous: it is said {len(hits)} times "
+                         f"after {after:.2f}s. Add words until it is unique.")
+    if hits:
+        i = hits[0]
+        return words[i]["start"], words[i + len(want) - 1]["end"]
     raise ValueError(f"plate phrase not in the delivered take: {phrase!r}\n"
                      f"transcript: {' '.join(toks)}")
 
@@ -127,24 +136,33 @@ def build_background(shots, spans, work, fullbleed=False, swipes=None, total=0.0
         clip = need(clip, f"b-roll shot {i}")
         dur = durs[i]
         p = work / f"bg{i:02d}.mp4"
+        # Looping a short shot restarts it on screen: a $6,000 counter visibly
+        # reset to $0 once. Hold the last frame instead, and say so.
+        hold = dur - duration(clip)
+        if hold > 0.05:
+            print(f"[final] WARNING {clip.name} is {dur - hold:.2f}s but its shot is "
+                  f"{dur:.2f}s: holding its last frame {hold:.2f}s. "
+                  f"Re-render it with --seconds {dur + 0.3:.1f}")
+        pre = f"[0:v]tpad=stop_mode=clone:stop_duration={max(hold, 0) + 0.1:.3f}[src];"
         if fullbleed:
             # The shot already IS the whole frame. The band and its blurred
             # surround exist to stop a graphic reading as a floating card; a
             # real desktop does not need that, and cropping one into a band
             # would throw away the thing the line is about.
-            fc = (f"[0:v]scale={C.W}:{C.H}:force_original_aspect_ratio=increase,"
+            fc = (pre + f"[src]scale={C.W}:{C.H}:force_original_aspect_ratio=increase,"
                   f"crop={C.W}:{C.H},fps={C.FPS}[v]")
         else:
             fc = (
-                f"[0:v]scale={C.W}:{C.H}:force_original_aspect_ratio=increase,"
+                pre + "[src]split[sa][sb];"
+                f"[sa]scale={C.W}:{C.H}:force_original_aspect_ratio=increase,"
                 f"crop={C.W}:{C.H},gblur=sigma=26,eq=brightness=-0.24:saturation=0.55,"
                 f"fps={C.FPS}[bgd];"
-                f"[0:v]scale={C.W}:{C.BAND_H}:force_original_aspect_ratio=increase,"
+                f"[sb]scale={C.W}:{C.BAND_H}:force_original_aspect_ratio=increase,"
                 f"crop={C.W}:{C.BAND_H},fps={C.FPS}[band];"
                 f"[bgd][band]overlay=0:{C.CONTENT_TOP}[v]"
             )
         run([ffmpeg(), "-y", "-loglevel", "error",
-             "-stream_loop", "-1", "-i", str(clip), "-t", f"{dur:.3f}",
+             "-i", str(clip), "-t", f"{dur:.3f}",
              "-filter_complex", fc, "-map", "[v]",
              "-an", "-c:v", "libx264", "-crf", "16", "-preset", "veryfast",
              "-pix_fmt", "yuv420p", str(p)])
@@ -315,6 +333,8 @@ def compose(spec, work, bg, take, matte, words, total, out_video):
     banner = theme.banner(pal, spec["banner"], spec["handle"])
     plates = []
     for p in spec.get("plates", []):
+        if not str(p.get("text", "")).strip():
+            continue                          # unfilled placeholder, not a plate
         a, z = resolve_plate(p, words, total)
         plates.append((a, z, theme.plate(pal, p["text"], p.get("y", 520),
                                          p.get("sub"), p.get("emoji"))))

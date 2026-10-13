@@ -43,6 +43,7 @@ CRITERIA = [
 ]
 
 PASS_MARK = 55
+TEST_MARK = 40   # between the two: test it as a Trial Reel before a full build
 
 BENCHMARKS = [
     (89480, "Flock, angry party + camera on a pole that bursts",
@@ -110,13 +111,24 @@ def main():
         print(f"    {b:>3}  {v:>6} views   {label}{here}")
     print()
 
+    # computed from BENCHMARKS, so the verdict can never contradict the table above
+    def band(lo, hi):
+        return [v for v, _, keys in BENCHMARKS if lo <= bench_score(keys) < hi]
+    missing = [q for k, w, q, _ in CRITERIA if not ans.get(k) and w >= 12]
     if s >= PASS_MARK:
         print("  VERDICT: shoot it.")
         print("  Open on the object. Sound at frame 0. Name the angry party in line 1.")
+    elif s >= TEST_MARK:
+        got = band(TEST_MARK, PASS_MARK)
+        print("  VERDICT: test it first. Post it as a Trial Reel (non-followers only)")
+        print(f"  before a full build. Benchmarks in this band did "
+              f"{', '.join(f'{v:,}' for v in sorted(got, reverse=True))} views.")
     else:
-        missing = [q for k, w, q, _ in CRITERIA if not ans.get(k) and w >= 12]
+        got = band(0, TEST_MARK)
         print("  VERDICT: do not build this yet.")
-        print("  4 of the 5 posts scoring under the mark got under 2,300 views, and the craft was not why.")
+        print(f"  Benchmarks under {TEST_MARK} did "
+              f"{', '.join(f'{v:,}' for v in sorted(got, reverse=True))} views, and the craft was not why.")
+    if s < PASS_MARK:
         if missing:
             print("  Closest thing to a fix, find an angle that makes one of these a yes:")
             for m in missing:
@@ -124,7 +136,7 @@ def main():
     if a.caption:
         print(f'\n  hook under test: "{a.caption}"')
         print("  now run: bash scripts/lint.sh \"<hook>\"")
-    return 0 if s >= PASS_MARK else 1
+    return 0 if s >= PASS_MARK else 2 if s >= TEST_MARK else 1
 
 
 if __name__ == "__main__":

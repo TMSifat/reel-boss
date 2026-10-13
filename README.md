@@ -7,6 +7,7 @@
 Topic gate · six line script · local AI voice · 2D and 3D motion b-roll · captions · loudness mastering · delivery verification
 
 [![ci](https://github.com/TMSifat/reel-boss/actions/workflows/ci.yml/badge.svg)](https://github.com/TMSifat/reel-boss/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/TMSifat/reel-boss)](https://github.com/TMSifat/reel-boss/releases)
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
@@ -34,7 +35,7 @@ checks impossible to skip.
 | | |
 |---|---|
 | 🎯 **Topic gate** | Scores an idea on what actually separated the hits from the flops, before anything is shot |
-| ✍️ **Direction** | The four beats, 20 hook patterns, the six line script, the recording pack, the caption funnel |
+| ✍️ **Direction** | The four beats, 23 hook patterns, the six line script, the recording pack, the caption funnel |
 | 🎙️ **Local AI voice** | No phone take? Kokoro reads the script on your CPU. No account, no credits |
 | 🎬 **Edit pipeline** | Cuts derived from the transcript, trimmed against measured silence, mastered to -14 LUFS |
 | 🧊 **3D b-roll** | three.js price bars and `.glb` turntables, rendered frame by frame |
@@ -95,7 +96,9 @@ folder inside it to `reel-boss`, and upload it under **Settings → Skills**.
 cp reel-system/keywords_burned.template.txt reel-system/keywords_burned.txt
 ```
 
-Seed it with every CTA keyword your account has ever used. It is git-ignored,
+Seed it with every CTA keyword your account has ever used. Using it for an
+account other than @billy.coder? Set `REEL_HANDLE` and `REEL_ACCOUNT`, and
+treat the reach evidence in `references/` as that account's to re-measure. It is git-ignored,
 so pulls never touch it. Emoji plates need Apple emoji baked on a Mac; see
 [`reel-system/assets/emoji`](reel-system/assets/emoji/README.md).
 
@@ -148,6 +151,9 @@ Machine-specific paths are environment variables, never edits:
 | `REEL_VOICE_MODELS` | `~/.cache/reel-boss/kokoro` | voice model cache |
 | `REEL_FONT_BOLD` / `_REG` / `_MONO` | Arial Black / Arial / Consolas or Menlo | fonts |
 | `REEL_BURNED_KEYWORDS` | `reel-system/keywords_burned.txt` | CTA keyword ledger |
+| `REEL_HANDLE` | `@billy.coder` | the handle on the banner |
+| `REEL_ACCOUNT` | `billy.coder` | the account `sync_burned.py` reads |
+| `REEL_MUSIC` | none | a music bed you hold the rights to, for `addmusic.py` |
 
 ## Repository layout
 

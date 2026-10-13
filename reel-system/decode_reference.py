@@ -43,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.util import ffmpeg, ffprobe  # noqa: E402
 
 OUT = Path(tempfile.gettempdir()) / "decode_reference"
+LOUD_OPENER_DB = -30.0   # RMS over the first 0.1s; verify.py fails a reel under it
 
 
 def sh(cmd):
@@ -196,7 +197,7 @@ def decode(f):
     f0 = frame0(f)
     if f0:
         parts = "   ".join(f"{k} {v:6.1f}" for k, v in f0.items())
-        verdict = "LOUD, good" if f0.get("0.1s", -99) > -30 else "SILENT OPENER, this is the dead-post signature"
+        verdict = "LOUD, good" if f0.get("0.1s", -99) > LOUD_OPENER_DB else "SILENT OPENER, this is the dead-post signature"
         print(f"  frame 0   dBFS RMS  {parts}   <- {verdict}")
 
     i, tp, lra = loudness(f)

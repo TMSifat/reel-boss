@@ -33,6 +33,13 @@ FAIL, WARN, OK = "FAIL", "WARN", "ok  "
 def verify(mp4, project=None, forbidden=(), max_seconds=None):
     mp4 = need(mp4, "delivered mp4")
     rows, fails = [], 0
+    # reel.json already knows the gate words and the ceiling; retyping them
+    # on the command line is how the repo-name check got skipped
+    spec_p = Path(project) / "reel.json" if project else None
+    if spec_p and spec_p.exists():
+        spec = json.loads(spec_p.read_text(encoding="utf-8"))
+        forbidden = list(dict.fromkeys([*forbidden, *spec.get("forbid", [])]))
+        max_seconds = max_seconds or spec.get("max_seconds")
 
     info = probe(mp4)
     v = next(s for s in info["streams"] if s["codec_type"] == "video")
@@ -53,6 +60,11 @@ def verify(mp4, project=None, forbidden=(), max_seconds=None):
     ceiling = float(max_seconds or C.MAX_SECONDS)
     chk(d <= ceiling + 0.6, "length", f"{d:.2f}s (ceiling {ceiling}s)")
     chk(has_audio(mp4), "audio stream", "present" if has_audio(mp4) else "MISSING")
+    if has_audio(mp4):
+        from decode_reference import frame0, LOUD_OPENER_DB
+        db = (frame0(mp4) or {}).get("0.1s", -99.0)
+        chk(db > LOUD_OPENER_DB, "sound at 0.1s",
+            f"{db:.1f} dBFS (hits: about -17, the 89 view reel: -64.6)")
     if has_audio(mp4):
         vd = float(v.get("duration") or d)
         ad = audio_duration(mp4)

@@ -105,6 +105,21 @@ def trim(take, words_json=None, speed=1.06):
     silences = detect_silence(wav)
 
     cuts = plan_cuts(data["words"], total, silences)
+    # Silence at 0.1s is the account's loudest dead-post signal, and a lead-in
+    # shorter than silencedetect's 0.12s floor was never cut. Start at the onset.
+    head = detect_silence(wav, min_dur=0.01)
+    if head and head[0][0] <= 0.01 and head[0][1] > 0.02:
+        onset = round(head[0][1] - 0.01, 3)
+        if cuts and cuts[0][0] <= 0.001:
+            cuts[0] = (0.0, max(onset, cuts[0][1]))
+        else:
+            cuts.insert(0, (0.0, onset))
+        # whisper often stamps the first word before any sound; a start inside
+        # the cut would drop that word from the captions when it is retimed
+        first = data["words"][0] if data["words"] else None
+        if first and first["start"] < cuts[0][1]:
+            first["start"] = cuts[0][1]
+        print(f"[trim] voice onset {onset + 0.01:.3f}s, reel starts there")
     # Snap to the frame grid. Off-grid pieces round their video up a frame while
     # the audio stays exact, and the error stacks per cut into lip-sync drift.
     keeps = [(round(a * C.FPS) / C.FPS, round(b * C.FPS) / C.FPS)
